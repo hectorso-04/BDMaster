@@ -1,32 +1,26 @@
-name: Ejecutar Script Diario
+name: Ejecutar notebook diariamente
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Ejecutar todos los días a medianoche (UTC)
-  push:
-    branches: [ main ]
+    - cron: '0 9 * * *'  # Se ejecuta diariamente a las 9:00 UTC (ajusta según tu zona horaria)
+  workflow_dispatch:  # Permite iniciar el workflow manualmente si lo deseas
 
 jobs:
-  run-script:
+  run-notebook:
     runs-on: ubuntu-latest
     steps:
-      - name: Clonar repositorio
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v3
 
-      - name: Instalar Python
-        uses: actions/upload-artifact@v4
+      - name: Configurar Python
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install nbconvert
 
-      - name: Ejecutar script
-        run: python scripts/pruebabdmaster.py
-
-      - name: Subir archivo generado
-        uses: actions/upload-artifact@v3
-        with:
-          name: base_consolidada
-          path: BASE_CONSOLIDADA.xlsx
-
+      - name: Ejecutar el notebook
+        run: |
+          jupyter nbconvert --to notebook --execute path/to/pruebabdmaster.ipynb --inplace
